@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>探秘人机编码有差异 - 互动学习单</title>
+    <style>
+        /* 多邻国风格配色 */
+        :root {
+            --duo-green: #58cc02;
+            --duo-green-dark: #58a700;
+            --duo-blue: #1cb0f6;
+            --duo-blue-dark: #1899d6;
+            --duo-title-blue: #1473e6; /* 更深邃好看的标题蓝 */
+            --duo-orange: #ff9600;
+            --duo-orange-dark: #e58700;
+            --duo-red: #ff4b4b;
+            --duo-red-dark: #ea2b2b;
+            --duo-gray: #e5e5e5;
+            --duo-text: #3c3c3c;
+            --duo-bg: #ffffff;
+            --page-bg: #f2f5f7;
+        }
+
+        body {
+            font-family: 'Nunito', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background-color: var(--page-bg);
+            color: var(--duo-text);
+            margin: 0;
+            padding: 30px;
+            display: flex;
+            justify-content: center;
+            font-weight: bold; 
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: var(--duo-bg);
+            padding: 40px;
+            border-radius: 24px;
+            border: 2px solid var(--duo-gray);
+            box-shadow: 0 8px 0 var(--duo-gray);
+        }
+
+        /* 顶部信息区 */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: var(--duo-title-blue);
+            font-size: 40px;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 0 rgba(20, 115, 230, 0.2);
+        }
+        .student-info {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        .info-input {
+            flex: 1;
+            max-width: 150px;
+            background: #f7f7f7;
+            border: 2px solid var(--duo-gray);
+            border-radius: 14px;
+            padding: 12px;
+            font-size: 16px;
+            text-align: center;
+            font-weight: bold;
+            outline: none;
+            color: var(--duo-text);
+            transition: 0.2s;
+        }
+        .info-input:focus {
+            border-color: var(--duo-blue);
+            background: #fff;
+        }
+
+        /* 任务板块通用 */
+        .section {
+            margin-bottom: 40px;
+            padding-top: 25px;
+            border-top: 2px dashed var(--duo-gray);
+        }
+        .section-title {
+            color: var(--duo-title-blue);
+            font-size: 24px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .desc-text {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.6;
+            font-weight: normal;
+        }
+
+        /* 3D 按钮样式 */
+        .btn {
+            background: var(--duo-blue);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 var(--duo-blue-dark);
+            transition: 0.1s;
+            outline: none;
+        }
+        .btn:active { transform: translateY(4px); box-shadow: 0 0 0 var(--duo-blue-dark); }
+        .btn-green { background: var(--duo-green); box-shadow: 0 4px 0 var(--duo-green-dark); }
+        .btn-green:active { box-shadow: 0 0 0 var(--duo-green-dark); }
+        .btn-orange { background: var(--duo-orange); box-shadow: 0 4px 0 var(--duo-orange-dark); }
+        .btn-orange:active { box-shadow: 0 0 0 var(--duo-orange-dark); }
+
+        /* 任务框 */
+        .task-box {
+            border: 2px solid var(--duo-gray);
+            border-radius: 18px;
+            padding: 20px;
+            background: #fafafa;
+        }
+        .input-box {
+            border: 2px solid var(--duo-gray);
+            border-radius: 14px;
+            padding: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            width: 200px;
+            outline: none;
+            text-align: center;
+        }
+        .input-box:focus { border-color: var(--duo-blue); }
+        .result-txt { font-size: 20px; color: var(--duo-orange); margin-top: 15px; }
+
+        /* 翻转卡片 */
+        .emoji-grid { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px;}
+        .flip-card { width: 90px; height: 90px; perspective: 1000px; cursor: pointer; }
+        .flip-inner { position: relative; width: 100%; height: 100%; transition: transform 0.5s; transform-style: preserve-3d; }
+        .flip-card:hover .flip-inner { transform: rotateY(180deg); }
+        .card-front, .card-back {
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+            border-radius: 16px; display: flex; align-items: center; justify-content: center;
+            border: 2px solid var(--duo-gray); box-shadow: 0 4px 0 var(--duo-gray); flex-direction: column;
+        }
+        .card-front { background: white; font-size: 40px; }
+        .card-back { background: var(--duo-blue); color: white; transform: rotateY(180deg); font-size: 12px; border-color: var(--duo-blue-dark); box-shadow: 0 4px 0 var(--duo-blue-dark);}
+
+        /* 画板双屏与附加题 */
+        .canvas-layout { display: flex; gap: 20px; margin-top: 15px; }
+        .canvas-wrapper { flex: 1; border: 2px solid var(--duo-gray); border-radius: 16px; background: white; overflow: hidden; }
+        canvas { display: block; width: 100%; height: 320px; cursor: crosshair; }
+        .code-box {
+            flex: 1; background: #282a36; border-radius: 16px; padding: 15px; color: #50fa7b; 
+            font-family: monospace; font-size: 14px; overflow-y: auto; height: 320px; box-sizing: border-box; font-weight: normal;
+        }
+        
+        .palette-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+        .color-dot { width: 36px; height: 36px; border-radius: 18px; border: 2px solid var(--duo-gray); cursor: pointer; transition: 0.1s; }
+        .color-dot:active { transform: scale(0.9); }
+        .color-dot.active { border: 3px solid var(--duo-text); transform: scale(1.1); }
+        
+        .custom-color-task {
+            display: flex; align-items: center; gap: 10px; background: #fff3e0; border: 2px solid var(--duo-orange);
+            padding: 5px 15px; border-radius: 16px; margin-left: auto;
+        }
+        input[type="color"] { width: 30px; height: 30px; border: none; padding: 0; background: transparent; cursor: pointer; }
+        .hex-code { font-family: monospace; color: var(--duo-orange); font-size: 16px; }
+
+        /* 拖拽表格游戏 */
+        .drag-game-container { background: white; border: 2px solid var(--duo-gray); border-radius: 16px; padding: 20px; }
+        .word-bank {
+            display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;
+            padding: 15px; background: #f7f7f7; border-radius: 14px; min-height: 50px; border: 2px dashed var(--duo-gray);
+        }
+        .draggable-item {
+            background: white; border: 2px solid var(--duo-gray); border-radius: 12px;
+            padding: 10px 16px; cursor: grab; font-size: 14px; font-weight: bold; color: var(--duo-title-blue);
+            box-shadow: 0 3px 0 var(--duo-gray); user-select: none;
+        }
+        .draggable-item:active { cursor: grabbing; box-shadow: 0 0 0 var(--duo-gray); transform: translateY(3px); }
+        .compare-table { width: 100%; border-collapse: separate; border-spacing: 0; border-radius: 14px; overflow: hidden; border: 2px solid var(--duo-gray); }
+        .compare-table th, .compare-table td { border-bottom: 2px solid var(--duo-gray); border-right: 2px solid var(--duo-gray); padding: 12px; text-align: center; }
+        .compare-table th { background: #f0f4f8; color: var(--duo-title-blue); font-size: 18px; }
+        .compare-table tr:last-child td { border-bottom: none; }
+        .compare-table td:last-child, .compare-table th:last-child { border-right: none; }
+        .drop-zone { background: #fafafa; min-height: 50px; border: 2px dashed #ccc; border-radius: 10px; transition: 0.2s; display: flex; align-items: center; justify-content: center;}
+        .drop-zone.drag-over { background: #e3f2fd; border-color: var(--duo-blue); }
+        .drop-zone.correct { background: #e8f5e9; border: 2px solid var(--duo-green); border-style: solid; }
+        .drop-zone.wrong { background: #ffebee; border: 2px solid var(--duo-red); border-style: solid; }
+
+        .export-area { text-align: center; margin-top: 40px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>人机编码有差异</h1>
+        <div class="student-info">
+            <input type="text" id="stuClass" class="info-input" placeholder="班级">
+            <input type="text" id="stuID" class="info-input" placeholder="学号">
+            <input type="text" id="stuName" class="info-input" placeholder="姓名">
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">✨ 1. 生活中的编码</div>
+        <div class="desc-text">人类看懂的是表情，而机器识别的则是“地址码”。试试翻转卡片：</div>
+        
+        <div class="emoji-grid">
+            <div class="flip-card"><div class="flip-inner"><div class="card-front">😊</div><div class="card-back"><b>U+1F60A</b><br>码位:128522</div></div></div>
+            <div class="flip-card"><div class="flip-inner"><div class="card-front">😎</div><div class="card-back"><b>U+1F60E</b><br>码位:128526</div></div></div>
+            <div class="flip-card"><div class="flip-inner"><div class="card-front">🚀</div><div class="card-back"><b>U+1F680</b><br>码位:128640</div></div></div>
+            <div class="flip-card"><div class="flip-inner"><div class="card-front">🍎</div><div class="card-back"><b>U+1F34E</b><br>码位:127822</div></div></div>
+        </div>
+
+        <div class="task-box">
+            <div style="margin-bottom: 10px;"><b>制造你的专属 Emoji！</b>输入 <b>128512 到 128580</b> 之间的数字：</div>
+            <input type="number" id="emojiInput" class="input-box" value="128514">
+            <button class="btn btn-green" onclick="generateEmoji()">告诉机器</button>
+            <span id="emojiOutput" style="font-size: 40px; vertical-align: middle; margin-left: 20px;">😂</span>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">🗣️ 2. 人类使用的编码</div>
+        <div class="desc-text">
+            <b>🔑 回顾：凯撒密码</b>。规则：每个字母变成字母表中的下一个（A ➔ B，Z ➔ A）。
+        </div>
+        <div class="task-box">
+            <input type="text" id="caesarInput" class="input-box" placeholder="输入英文单词">
+            <button class="btn btn-orange" onclick="encodeCaesar()">生成暗号</button>
+            <div class="result-txt" id="caesarOutput"></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">🤖 3. 计算机使用的编码</div>
+        <div class="desc-text">
+            计算机只能理解“开”和“关”，所以使用二进制（0和1）。
+        </div>
+        <div class="task-box">
+            <div style="margin-bottom: 10px; color: #555;"><b>💡 提示：</b>请在下方输入<b>刚好 8 位</b>由 0 和 1 组成的数字（例如 01000001）：</div>
+            <input type="text" id="binaryInput" class="input-box" placeholder="如：01000001">
+            <button class="btn" onclick="decodeBinary()">翻译成人类语言</button>
+            <div class="result-txt" id="binaryOutput" style="line-height: 1.5; font-size: 18px;"></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">🎨 4. 场景模拟：画一个图案</div>
+        <div class="desc-text">
+            <b>人类：</b>凭直觉直接画。<br>
+            <b>计算机：</b>需要不断获取 <b>(X,Y) 坐标</b> 和 <b>十六进制颜色代码 (Hex)</b> 并执行指令。
+        </div>
+
+        <div class="task-box">
+            <div class="palette-bar">
+                <b>画笔：</b>
+                <div class="color-dot active" style="background:#3c3c3c;" onclick="setPenColor(this, '#3c3c3c')"></div>
+                <div class="color-dot" style="background:#58cc02;" onclick="setPenColor(this, '#58cc02')"></div>
+                <div class="color-dot" style="background:#1cb0f6;" onclick="setPenColor(this, '#1cb0f6')"></div>
+                
+                <div class="custom-color-task">
+                    <b>🌟 附加题：自由画笔颜色代码</b>
+                    <input type="color" id="customColor" value="#ff00ff" oninput="useCustomColor()">
+                    <span class="hex-code" id="hexDisplay">#ff00ff</span>
+                </div>
+
+                <button class="btn btn-orange" style="margin-left: auto; padding: 8px 16px;" onclick="clearCanvas()">清空画板</button>
+            </div>
+
+            <div class="canvas-layout">
+                <div class="canvas-wrapper"><canvas id="drawCanvas"></canvas></div>
+                <div class="code-box" id="codeArea">
+                    <span style="color:#6272a4;">// 计算机已就绪，正在监听绘画指令...</span><br>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">🧩 5. 测验：人机编码差异大比拼</div>
+        <div class="desc-text">将上方词库中的“积木块”<b>拖动并放入</b>下方表格正确的位置里吧！</div>
+
+        <div class="drag-game-container">
+            <div class="word-bank" id="wordBank">
+                <div class="draggable-item" draggable="true" data-ans="human-form">文字、符号、图像</div>
+                <div class="draggable-item" draggable="true" data-ans="machine-form">二进制（0和1）</div>
+                <div class="draggable-item" draggable="true" data-ans="human-mem">方便记忆，利于交流</div>
+                <div class="draggable-item" draggable="true" data-ans="machine-mem">不求记忆，追求效率</div>
+                <div class="draggable-item" draggable="true" data-ans="human-flex">高，可创造新编码</div>
+                <div class="draggable-item" draggable="true" data-ans="machine-flex">低，严格遵循协议规则</div>
+                <div class="draggable-item" draggable="true" data-ans="human-und">可以理解模糊/抽象含义</div>
+                <div class="draggable-item" draggable="true" data-ans="machine-und">只能理解精确具体的指令</div>
+            </div>
+
+            <table class="compare-table">
+                <tr>
+                    <th style="width: 20%;">比较项</th>
+                    <th style="width: 40%;">👨 人类编码</th>
+                    <th style="width: 40%;">🤖 计算机编码</th>
+                </tr>
+                <tr>
+                    <td><b>基础形式</b></td>
+                    <td><div class="drop-zone" data-target="human-form"></div></td>
+                    <td><div class="drop-zone" data-target="machine-form"></div></td>
+                </tr>
+                <tr>
+                    <td><b>记忆性</b></td>
+                    <td><div class="drop-zone" data-target="human-mem"></div></td>
+                    <td><div class="drop-zone" data-target="machine-mem"></div></td>
+                </tr>
+                <tr>
+                    <td><b>灵活性</b></td>
+                    <td><div class="drop-zone" data-target="human-flex"></div></td>
+                    <td><div class="drop-zone" data-target="machine-flex"></div></td>
+                </tr>
+                <tr>
+                    <td><b>理解能力</b></td>
+                    <td><div class="drop-zone" data-target="human-und"></div></td>
+                    <td><div class="drop-zone" data-target="machine-und"></div></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="export-area">
+        <button class="btn btn-green" style="font-size: 20px; padding: 15px 40px;" onclick="exportData()">✅ 完成任务并导出报告</button>
+    </div>
+</div>
+
+<script>
+    // --- 页面加载完成时：打乱词库积木的顺序 ---
+    window.onload = function() {
+        const wordBank = document.getElementById('wordBank');
+        for (let i = wordBank.children.length; i >= 0; i--) {
+            wordBank.appendChild(wordBank.children[Math.random() * i | 0]);
+        }
+    };
+
+    // --- 任务一：Emoji ---
+    function generateEmoji() {
+        const val = document.getElementById('emojiInput').value;
+        try { document.getElementById('emojiOutput').innerText = String.fromCodePoint(val); } 
+        catch(e) { document.getElementById('emojiOutput').innerText = "❓"; }
+    }
+
+    // --- 任务二：凯撒密码 ---
+    function encodeCaesar() {
+        const str = document.getElementById('caesarInput').value.toUpperCase();
+        let result = '';
+        for (let i = 0; i < str.length; i++) {
+            let charCode = str.charCodeAt(i);
+            if (charCode >= 65 && charCode <= 90) {
+                result += String.fromCharCode(charCode === 90 ? 65 : charCode + 1);
+            } else { result += str[i]; }
+        }
+        document.getElementById('caesarOutput').innerText = "加密结果: " + result;
+    }
+
+    // --- 任务三：二进制 (增加了 8 位严格校验与隐形字符解释) ---
+    function decodeBinary() {
+        const bin = document.getElementById('binaryInput').value.replace(/\s+/g, '');
+        const output = document.getElementById('binaryOutput');
+        
+        // 校验：必须是数字0和1，且刚好是8位倍数
+        if (!/^[01]+$/.test(bin) || bin.length % 8 !== 0 || bin.length === 0) {
+            output.innerText = "❌ 格式不对哦！请输入刚好 8 位的 0 和 1（例如：01000001）。"; 
+            output.style.color = "var(--duo-red)"; 
+            return;
+        }
+        
+        try {
+            let res = ""; let hidden = false;
+            for (let i = 0; i < bin.length; i += 8) {
+                let dec = parseInt(bin.slice(i, i + 8), 2);
+                //  ASCII 控制字符或扩展字符判断 (像10001000这种)
+                if(dec < 32 || dec === 127 || dec > 126) hidden = true;
+                if(!hidden) res += String.fromCharCode(dec);
+            }
+            
+            if(hidden) { 
+                output.innerHTML = "🤫 <b>解码成功！但这是一个“隐形指令”</b><br><span style='font-size:15px; color:#777;'>这个二进制码代表了计算机里的控制键（比如回车键、删除键等），所以它在屏幕上是显示不出具体文字图案的哦！</span>"; 
+                output.style.color = "var(--duo-orange)"; 
+            } else { 
+                output.innerText = "翻译结果: " + res; 
+                output.style.color = "var(--duo-green)"; 
+            }
+        } catch (e) { output.innerText = "❌ 翻译失败"; }
+    }
+
+    // --- 任务四：画板与颜色代码 ---
+    const canvas = document.getElementById('drawCanvas');
+    const ctx = canvas.getContext('2d');
+    const codeArea = document.getElementById('codeArea');
+    let isDrawing = false;
+    let codeLines = [];
+    let currentPenColor = '#3c3c3c';
+
+    function resizeCanvas() {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight || 320;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function setPenColor(btnElement, hexColor) {
+        currentPenColor = hexColor;
+        document.querySelectorAll('.color-dot').forEach(btn => btn.classList.remove('active'));
+        if(btnElement) btnElement.classList.add('active');
+        appendCode(`<span style="color:#f1fa8c;">// 切换画笔颜色为 ${hexColor}</span>`);
+    }
+
+    function useCustomColor() {
+        const hex = document.getElementById('customColor').value;
+        document.getElementById('hexDisplay').innerText = hex;
+        setPenColor(null, hex); 
+    }
+
+    function startDraw(e) { isDrawing = true; draw(e); }
+    function endDraw() { isDrawing = false; ctx.beginPath(); }
+    
+    function draw(e) {
+        if (!isDrawing) return;
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+        if(!clientX) return;
+
+        const x = Math.round(clientX - rect.left);
+        const y = Math.round(clientY - rect.top);
+
+        ctx.lineWidth = 5;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = currentPenColor;
+
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+
+        appendCode(`draw(x: <span style="color:#ffb86c">${x}</span>, y: <span style="color:#ffb86c">${y}</span>, color: <span style="color:#8be9fd">'${currentPenColor}'</span>);`);
+    }
+
+    function appendCode(str) {
+        if(codeLines.length > 500) codeLines.shift(); 
+        codeLines.push(`<div>${str}</div>`);
+        codeArea.innerHTML = codeLines.join('');
+        codeArea.scrollTop = codeArea.scrollHeight;
+    }
+
+    canvas.addEventListener('mousedown', startDraw);
+    canvas.addEventListener('mouseup', endDraw);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseout', endDraw);
+    canvas.addEventListener('touchstart', startDraw, {passive: true});
+    canvas.addEventListener('touchend', endDraw);
+    canvas.addEventListener('touchmove', draw, {passive: true});
+
+    function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        codeLines = [];
+        codeArea.innerHTML = '<span style="color:#6272a4;">// 画板已清空，等待指令...</span><br>';
+    }
+
+    // --- 任务五：拖拽游戏系统 ---
+    const draggables = document.querySelectorAll('.draggable-item');
+    const dropZones = document.querySelectorAll('.drop-zone');
+    const wordBank = document.getElementById('wordBank');
+
+    draggables.forEach(draggable => {
+        draggable.addEventListener('dragstart', () => { draggable.classList.add('dragging'); });
+        draggable.addEventListener('dragend', () => { draggable.classList.remove('dragging'); checkTableComplete(); });
+    });
+
+    dropZones.forEach(zone => {
+        zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+        zone.addEventListener('dragleave', () => { zone.classList.remove('drag-over'); });
+        zone.addEventListener('drop', e => {
+            e.preventDefault();
+            zone.classList.remove('drag-over');
+            const draggingEl = document.querySelector('.dragging');
+            if(draggingEl) {
+                if(zone.children.length > 0) { wordBank.appendChild(zone.children[0]); }
+                zone.appendChild(draggingEl);
+                
+                const requiredAns = zone.getAttribute('data-target');
+                const studentAns = draggingEl.getAttribute('data-ans');
+                if(requiredAns === studentAns) {
+                    zone.classList.remove('wrong'); zone.classList.add('correct');
+                } else {
+                    zone.classList.remove('correct'); zone.classList.add('wrong');
+                }
+            }
+        });
+    });
+
+    wordBank.addEventListener('dragover', e => e.preventDefault());
+    wordBank.addEventListener('drop', e => {
+        e.preventDefault();
+        const draggingEl = document.querySelector('.dragging');
+        if(draggingEl) wordBank.appendChild(draggingEl);
+    });
+
+    let isGameComplete = false;
+    function checkTableComplete() {
+        const correctZones = document.querySelectorAll('.drop-zone.correct');
+        if(correctZones.length === 8 && !isGameComplete) {
+            isGameComplete = true;
+            setTimeout(() => alert("🎉 太棒了！所有差异特征都填对了！"), 300);
+        }
+    }
+
+    // --- 导出 ---
+    function exportData() {
+        const cls = document.getElementById('stuClass').value || "班级";
+        const id = document.getElementById('stuID').value || "学号";
+        const name = document.getElementById('stuName').value || "姓名";
+        const favColor = document.getElementById('hexDisplay').innerText;
+        const dragScore = document.querySelectorAll('.drop-zone.correct').length;
+        
+        const content = `=== 人机编码差异 · 学习成果 ===\n` +
+                        `班级：${cls} | 学号：${id} | 姓名：${name}\n\n` +
+                        `【挑战记录】\n` +
+                        `1. 探秘了 Emoji 机器码位。\n` +
+                        `2. 完成了凯撒密码加密实验。\n` +
+                        `3. 验证了二进制与 ASCII 的对应关系，并理解了隐藏的控制字符。\n` +
+                        `4. 附加题：学会了自定义颜色的 Hex 编码（${favColor}），并理解了机器靠读取坐标和颜色指令画图。\n` +
+                        `5. 拖拽连线大挑战得分：${dragScore} / 8\n\n` +
+                        `表现非常棒！`;
+
+        const blob = new Blob([content], { type: 'text/plain' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `${cls}_${id}_${name}.txt`;
+        link.click();
+    }
+</script>
+
+</body>
+</html>
