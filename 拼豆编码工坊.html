@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>拼豆编码工坊 / Pixel Bead Studio</title>
+  <style>
+    body { margin:0; min-height:100vh; display:grid; place-items:center; font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:#f4f9ee; color:#425344; }
+    .loading { text-align:center; padding:28px; }
+    .loading strong { display:block; font-size:1.3rem; margin-bottom:8px; }
+  </style>
+</head>
+<body>
+  <div class="loading"><strong>拼豆编码工坊加载中...</strong><span>正在展开互动页面</span></div>
+  <script>
+    (async () => {
+      try {
+        if (!('DecompressionStream' in window)) throw new Error('当前浏览器不支持页面解压加载。');
+        const names = Array.from({ length: 10 }, (_, i) => `assets/bead-studio/payload-${String(i + 1).padStart(2, '0')}.txt`);
+        const payload = (await Promise.all(names.map(name => fetch(name).then(res => {
+          if (!res.ok) throw new Error(`无法读取 ${name}`);
+          return res.text();
+        })))).join('').replace(/\s+/g, '');
+        const bytes = Uint8Array.from(atob(payload), char => char.charCodeAt(0));
+        const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+        const html = await new Response(stream).text();
+        document.open();
+        document.write(html);
+        document.close();
+      } catch (error) {
+        document.body.innerHTML = '<div class="loading"><strong>页面加载失败</strong><span>' + error.message + '</span></div>';
+      }
+    })();
+  </script>
+</body>
+</html>
